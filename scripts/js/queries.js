@@ -625,6 +625,14 @@ $(() => {
       { data: "reply.time", width: "4%", render: formatReplyTime, searchable: false },
       { data: null, width: "10%", sortable: false, searchable: false },
     ],
+    // Escape data cells by default so attacker-influenced PTR/domain strings
+    // cannot become HTML before rowCallback rewrites selected cells.
+    columnDefs: [
+      {
+        targets: [1, 2, 3, 4],
+        render: $.fn.dataTable.render.text(),
+      },
+    ],
     lengthMenu: [
       [10, 25, 50, 100, 500, 1000],
       [10, 25, 50, 100, 500, 1000],

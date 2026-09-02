@@ -14,6 +14,16 @@
     "url": "https://github.com/pi-hole/web/issues"
   },
   "homepage": "https://github.com/pi-hole/web#readme",
+  "x-pihole-dependency-upgrade-plan": {
+    "priority": "datatables.net-bs → 2.x (column render overrides columnDefs text escaping; see settings-dns-records.js XSS class)",
+    "followups": [
+      "bootstrap 3.4.1 → 5.x (EOL 2019)",
+      "admin-lte 2.4.18 → 4.x",
+      "bootstrap-select 1.13.18 → maintained fork/successor",
+      "review/replace myclabs.jquery.confirm (re-publish of abandoned jquery-confirm)"
+    ],
+    "note": "Majors upgrade is intentionally out of scope for the targeted security/reliability fix PR; escapeHtml hardening closes the DataTables XSS class without a breaking UI rewrite."
+  },
   "scripts": {
     "prefix": "postcss \"style/*.css\" \"style/themes/*.css\" --use autoprefixer --no-map --replace",
     "prettier:check": "prettier -l \"style/*.css\" \"style/themes/*.css\" \"scripts/**/*.js\"",

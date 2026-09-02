@@ -36,16 +36,21 @@ function doSearch() {
 
   const verb = partial ? "partially" : "exactly";
 
+  // Disable controls while the async search runs so the tab stays responsive
+  // without allowing overlapping requests from repeated clicks/Enter.
+  utils.disableAll();
+  ta.empty().show().text("Searching...");
+
   $.ajax({
     method: "GET",
     url: document.body.dataset.apiurl + "/search/" + encodeURIComponent(q),
-    async: false,
     data: {
       partial,
       N,
     },
   })
     .done(data => {
+      utils.enableAll();
       ta.empty();
       ta.show();
 
@@ -194,6 +199,8 @@ function doSearch() {
       ta.append(result);
     })
     .fail(data => {
+      utils.enableAll();
+      ta.empty();
       apiFailure(data);
     });
 }

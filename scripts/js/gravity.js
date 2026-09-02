@@ -9,6 +9,14 @@
 
 "use strict";
 
+// Cap rendered output like taillog.js to bound DOM size on long runs
+const GRAVITY_MAX_LINES = 5000;
+
+// Accumulated HTML (already escaped + ANSI→span). Avoids the quadratic cost of
+// reading outputElement.innerHTML (DOM serialize) and rewriting it on every
+// line within a streamed chunk — update the buffer in memory, write once/chunk.
+let gravityHtml = "";
+
 function eventsource() {
   const $alertInfo = $("#alertInfo");
   const $alertSuccess = $("#alertSuccess");
@@ -17,9 +25,8 @@ function eventsource() {
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
   const url = `${document.body.dataset.apiurl}/action/gravity?color=true`;
 
-  if (outputElement.innerHTML.length > 0) {
-    outputElement.innerHTML = "";
-  }
+  gravityHtml = "";
+  outputElement.innerHTML = "";
 
   if (!outputElement.classList.contains("d-none")) {
     outputElement.classList.add("d-none");
@@ -95,9 +102,9 @@ function parseLines(outputElement, text) {
       // This line starts with the "OVER" sequence. Replace them with "\n" before print
       line = line.replaceAll("\r\u001B[K", "\n").replaceAll("\r", "\n");
 
-      // Last line from the textarea will be overwritten, so we remove it
-      const lastLineIndex = outputElement.innerHTML.lastIndexOf("\n");
-      outputElement.innerHTML = outputElement.innerHTML.substring(0, lastLineIndex);
+      // Last line from the buffer will be overwritten, so we remove it
+      const lastLineIndex = gravityHtml.lastIndexOf("\n");
+      gravityHtml = lastLineIndex === -1 ? "" : gravityHtml.substring(0, lastLineIndex);
     }
 
     // Track the number of opening spans
@@ -139,9 +146,18 @@ function parseLines(outputElement, text) {
       return match; // Return unchanged if not recognized
     });
 
-    // Append the new text to the end of the output
-    outputElement.innerHTML += line;
+    // Append the new text to the in-memory buffer (not the live DOM)
+    gravityHtml += line;
   }
+
+  // Cap output size to avoid unbounded DOM growth on long gravity runs
+  const parts = gravityHtml.split("\n");
+  if (parts.length > GRAVITY_MAX_LINES) {
+    gravityHtml = parts.slice(parts.length - GRAVITY_MAX_LINES).join("\n");
+  }
+
+  // Single DOM write per streamed chunk
+  outputElement.innerHTML = gravityHtml;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
