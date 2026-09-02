@@ -240,14 +240,33 @@ function initTable() {
         codeElem.textContent = data.address;
         $("td:eq(3)", row).empty().append(codeElem);
       } else {
-        const aElem = document.createElement("a");
-        aElem.id = "address_" + dataId;
-        aElem.className = "breakall";
-        aElem.href = data.address;
-        aElem.target = "_blank";
-        aElem.rel = "noopener noreferrer";
-        aElem.textContent = data.address;
-        $("td:eq(3)", row).empty().append(aElem);
+        // Only allow http(s) hrefs — reject javascript:/data:/etc.
+        let safeHref = null;
+        try {
+          const parsed = new URL(data.address, globalThis.location.origin);
+          if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+            safeHref = parsed.href;
+          }
+        } catch {
+          safeHref = null;
+        }
+
+        if (safeHref === null) {
+          const codeElem = document.createElement("code");
+          codeElem.id = "address_" + dataId;
+          codeElem.className = "breakall";
+          codeElem.textContent = data.address;
+          $("td:eq(3)", row).empty().append(codeElem);
+        } else {
+          const aElem = document.createElement("a");
+          aElem.id = "address_" + dataId;
+          aElem.className = "breakall";
+          aElem.href = safeHref;
+          aElem.target = "_blank";
+          aElem.rel = "noopener noreferrer";
+          aElem.textContent = data.address;
+          $("td:eq(3)", row).empty().append(aElem);
+        }
       }
 
       $("td:eq(4)", row).html(
