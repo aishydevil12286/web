@@ -9,6 +9,8 @@
 
 "use strict";
 
+const GRAVITY_MAX_LINES = 5000;
+
 function eventsource() {
   const $alertInfo = $("#alertInfo");
   const $alertSuccess = $("#alertSuccess");
@@ -141,6 +143,12 @@ function parseLines(outputElement, text) {
 
     // Append the new text to the end of the output
     outputElement.innerHTML += line;
+  }
+
+  // Cap output size to avoid unbounded DOM growth on long gravity runs
+  const parts = outputElement.innerHTML.split("\n");
+  if (parts.length > GRAVITY_MAX_LINES) {
+    outputElement.innerHTML = parts.slice(parts.length - GRAVITY_MAX_LINES).join("\n");
   }
 }
 

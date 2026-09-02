@@ -60,8 +60,9 @@ function escapeHtml(text) {
     "'": "&#039;",
   };
 
-  // Return early when text is not a string
-  if (typeof text !== "string") return text;
+  // Coerce so callers that pass numbers/null still get a safe string
+  if (text === undefined || text === null) return "";
+  if (typeof text !== "string") text = String(text);
 
   return text.replaceAll(/[&<>"']/gu, m => map[m]);
 }

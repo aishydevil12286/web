@@ -252,7 +252,8 @@ function updateForwardDestinationsPie() {
       upstreamIPs.push(item.port > 0 ? item.ip + "#" + item.port : item.ip);
 
       const percent = (100 * item.count) / sum;
-      values.push([label, percent, THEME_COLORS[i++ % THEME_COLORS.length]]);
+      // Escape before Chart.js tooltip innerHTML sink
+      values.push([utils.escapeHtml(label), percent, THEME_COLORS[i++ % THEME_COLORS.length]]);
     }
 
     // Split data into individual arrays for the graphs
