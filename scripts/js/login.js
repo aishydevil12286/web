@@ -173,9 +173,11 @@ $(() => {
       if (data.session.valid === true) redirect();
     })
     .fail(xhr => {
-      const session = xhr.responseJSON.session;
-      // If TOPT is enabled, show the input field and add the required attribute
-      if (session.totp === true) {
+      // Non-JSON failures (proxy error pages, CORS, etc.) have no responseJSON —
+      // guard like doLogin's .fail() so TOTP setup is not broken by a throw.
+      const session = xhr.responseJSON && xhr.responseJSON.session;
+      // If TOTP is enabled, show the input field and add the required attribute
+      if (session && session.totp === true) {
         $("#totp_input").removeClass("hidden");
         $("#totp").attr("required", "required");
         $("#totp-forgotten-title").removeClass("hidden");

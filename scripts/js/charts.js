@@ -227,11 +227,16 @@ function setTooltipContent(tooltipEl, tooltip) {
       `border: ${devicePixel}px solid #fff`;
     const span = `<span class="chartjs-tooltip-key" style="${style}"></span>`;
 
-    const num = body[0].split(": ");
+    // Callbacks may return an array of plain-text lines; join, escape, then
+    // allow newlines as <br>. Escaping here (not at every call site) keeps
+    // the innerHTML sink safe even if a future chart forgets to pre-escape.
+    const bodyText = Array.isArray(body) ? body.join("\n") : String(body);
+    const num = bodyText.split(": ");
     // Do not display entries with value of 0 in bar chart,
     // but pass through entries with "0.0%" (in pie charts)
     if (num[1] !== "0") {
-      tooltipHtml += `<tr><td>${span}${body}</td></tr>`;
+      const escapedBody = utils.escapeHtml(bodyText).replaceAll("\n", "<br>");
+      tooltipHtml += `<tr><td>${span}${escapedBody}</td></tr>`;
       printed++;
     }
   }
@@ -377,7 +382,8 @@ globalThis.doughnutTooltip = tooltipLabel => {
   // tooltipLabel.chart._metasets[0].total returns the total percentage of the shown slices
   // to compensate rounding errors we round to one decimal
   let percentageTotalShown = tooltipLabel.chart._metasets[0].total.toFixed(1);
-  const label = ` ${utils.escapeHtml(tooltipLabel.label)}`;
+  // Plain text only — setTooltipContent() escapes before writing to innerHTML
+  const label = ` ${tooltipLabel.label}`;
   let itemPercentage;
 
   // if we only show < 1% percent of all, show each item with two decimals
@@ -402,10 +408,8 @@ globalThis.doughnutTooltip = tooltipLabel => {
   percentageTotalShown = tooltipLabel.chart._metasets[0].total;
   const percentageOfShownItems = ((tooltipLabel.parsed * 100) / percentageTotalShown).toFixed(1);
 
-  return (
-    `${label}:<br>&bull; ${itemPercentage}% of all data<br>` +
-    `&bull; ${percentageOfShownItems}% of shown items`
-  );
+  // Newlines become <br> inside setTooltipContent after escaping
+  return `${label}:\n• ${itemPercentage}% of all data\n• ${percentageOfShownItems}% of shown items`;
 };
 
 // chartjs plugin used by the custom doughnut legend
