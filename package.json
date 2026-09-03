@@ -26,13 +26,14 @@
   },
   "scripts": {
     "prefix": "postcss \"style/*.css\" \"style/themes/*.css\" --use autoprefixer --no-map --replace",
-    "prettier:check": "prettier -l \"style/*.css\" \"style/themes/*.css\" \"scripts/**/*.js\"",
-    "prettier:fix": "prettier --write \"style/*.css\" \"style/themes/*.css\" \"scripts/**/*.js\"",
+    "prettier:check": "prettier -l \"style/*.css\" \"style/themes/*.css\" \"scripts/**/*.js\" \"test/**/*.js\" \"vitest.config.mjs\"",
+    "prettier:fix": "prettier --write \"style/*.css\" \"style/themes/*.css\" \"scripts/**/*.js\" \"test/**/*.js\" \"vitest.config.mjs\"",
     "xo": "xo",
     "xo:check": "npm run xo",
     "xo:fix": "npm run xo -- --fix",
-    "test": "npm run prettier:check && npm run xo:check",
-    "testpr": "npm run prefix && npm run prettier:fix && git diff --ws-error-highlight=all --color=always --exit-code && npm run xo:check"
+    "test:unit": "vitest run",
+    "test": "npm run prettier:check && npm run xo:check && npm run test:unit",
+    "testpr": "npm run prefix && npm run prettier:fix && git diff --ws-error-highlight=all --color=always --exit-code && npm run xo:check && npm run test:unit"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "6.7.2",
@@ -63,12 +64,15 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
+    "datatables.net": "^1.13.11",
     "eslint": "^10.5.0",
     "eslint-plugin-compat": "^7.0.2",
     "globals": "^17.6.0",
+    "jsdom": "^30.0.1",
     "postcss": "^8.5.15",
     "postcss-cli": "^11.0.1",
     "prettier": "^3.8.4",
+    "vitest": "^5.0.0",
     "xo": "^2.0.1"
   },
   "browserslist": [
