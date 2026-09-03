@@ -47,7 +47,7 @@ function fillDNSupstreams(value, servers) {
             customServers--;
           }
 
-          row += `<td title="${address[index]}">
+          row += `<td title="${utils.escapeHtml(address[index])}">
                     <div>
                       <input type="checkbox" id="DNSupstreams-${i}" ${disabledStr} ${checkedStr}>
                       <label for="DNSupstreams-${i++}"></label>
@@ -60,7 +60,7 @@ function fillDNSupstreams(value, servers) {
     }
 
     // Add server name
-    row += "<td>" + element.name + "</td>";
+    row += "<td>" + utils.escapeHtml(element.name) + "</td>";
 
     // Close table row
     row += "</tr>";
@@ -198,6 +198,12 @@ function createRevServerTable() {
         // eslint-disable-next-line no-unused-vars
         createdCell(td, cellData, rowData, row, col) {
           $(td).attr("contenteditable", "true").attr("data-initial-value", cellData);
+        },
+        // Per-column render overrides columnDefs text escaping — escape explicitly.
+        // network/ip/domain come from FTL's dns.revServers config, which is
+        // admin-settable via the API, so they must not be inserted as raw HTML.
+        render(data) {
+          return utils.escapeHtml(data);
         },
       },
     ],

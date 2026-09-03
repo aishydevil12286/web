@@ -65,4 +65,26 @@ module.exports = defineConfig([
       "unicorn/switch-case-braces": "off",
     },
   },
+  {
+    // Unlike scripts/js/*.js (classic browser scripts, sourceType: "script"
+    // above), test/**/*.js and the vitest config are Node ESM: they use
+    // import/export and run under Node (via vitest), not loaded as a
+    // browser <script>.
+    files: ["test/**/*.js", "vitest.config.mjs"],
+    languageOptions: {
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      // ESM files don't carry (and don't need) a "use strict" pragma.
+      strict: "off",
+      // Tests load classic scripts.js source via vm.runInThisContext() and
+      // read the resulting functions off the global object by design (see
+      // test/helpers/loadClassicScript.js) -- there is no module to import
+      // them from.
+      "no-undef": "off",
+    },
+  },
 ]);
